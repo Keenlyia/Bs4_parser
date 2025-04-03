@@ -101,7 +101,7 @@ except AttributeError:
 try:
     review_text = soup.find('a', attrs={
         'href': 'https://rozetka.com.ua/ua/apple-iphone-15-128gb-black/p395460480/comments/'}).text.strip()
-    parts = review_text.split()  # Розбиваємо текст на слова
+    parts = review_text.split()
     product['reviews'] = next((part for part in parts if part.isdigit()), "0")
 except AttributeError:
     product['reviews'] = "0 відгуків"
