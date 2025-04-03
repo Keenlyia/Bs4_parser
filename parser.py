@@ -1,4 +1,6 @@
 import os
+from itertools import product
+
 from openpyxl import load_workbook, Workbook
 import requests
 from bs4 import BeautifulSoup
@@ -75,8 +77,8 @@ except (AttributeError, IndexError):
     product['memory'] = None
 
 try:
-    seller = soup.find('span', attrs={'_ngcontent-rz-client-c2548945983': True}).find_next_sibling('span').text.strip()
-    product['seller'] = seller
+    seller_text = soup.find('span', attrs={'_ngcontent-rz-client-c2548945983': True}).find_next_sibling('span').text.strip()
+    product['seller'] = seller_text.replace("Продавець:", "").strip() if seller_text else None
 except AttributeError:
     product['seller'] = None
 
@@ -91,12 +93,16 @@ except AttributeError:
     product['discount_price'] = None
 
 try:
-    product['product_code'] = soup.find('span', attrs={'class': 'ms-auto color-black-60'}).text.strip()
+    product_text = soup.find('span', attrs={'class': 'ms-auto color-black-60'}).text.strip()
+    product['product_code'] = product_text.replace("Код:", "").strip() if product_text else None
 except AttributeError:
     product['product_code'] = None
 
 try:
-    product['reviews'] = soup.find('a', attrs={'href': 'https://rozetka.com.ua/ua/apple-iphone-15-128gb-black/p395460480/comments/'}).text.strip()
+    review_text = soup.find('a', attrs={
+        'href': 'https://rozetka.com.ua/ua/apple-iphone-15-128gb-black/p395460480/comments/'}).text.strip()
+    parts = review_text.split()  # Розбиваємо текст на слова
+    product['reviews'] = next((part for part in parts if part.isdigit()), "0")
 except AttributeError:
     product['reviews'] = "0 відгуків"
 
