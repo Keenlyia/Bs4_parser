@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 
 
 URL = 'https://rozetka.com.ua/apple-iphone-15-128gb-black/p395460480/'
+URL_CHARACTERISTICS = 'https://rozetka.com.ua/ua/apple-iphone-15-128gb-black/p395460480/characteristics/'
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36',
@@ -19,6 +20,11 @@ headers = {
 # Fetch data from the page
 response = requests.get(URL, headers=headers)
 soup = BeautifulSoup(response.text, 'html.parser')
+
+# Fetch data from the characteristics
+response_ch = requests.get(URL_CHARACTERISTICS, headers=headers)
+soup_ch = BeautifulSoup(response_ch.text, 'html.parser')
+
 
 
 def create_or_load_excel(template_path):
@@ -72,7 +78,7 @@ except AttributeError:
     product['color'] = None
 
 try:
-    product['memory'] = soup.select('span.bold')[1].text.strip()
+    product['memory'] = soup.find('span', class_='bold').find_next('span', class_='bold').text.strip()
 except (AttributeError, IndexError):
     product['memory'] = None
 
@@ -104,29 +110,29 @@ try:
     parts = review_text.split()
     product['reviews'] = next((part for part in parts if part.isdigit()), "0")
 except AttributeError:
-    product['reviews'] = "0 відгуків"
+    product['reviews'] = None
 
 # Collect image URLs
 try:
-    images = soup.find_all('img', attrs={'class': 'thumbnail-button__picture'})
-    product['image_urls'] = [img.get('src') for img in images if img.get('src')]
+    images = soup.find_all('img', attrs={'class': 'image'})
+    product['image_urls'] = [img.get('src') for img in images]
 except AttributeError:
-    product['image_urls'] = []
+    product['image_urls'] = None
 
 # Collect product characteristics
 try:
-    keys = soup.find_all('dt', attrs={'class': 'label'})
+    keys = soup_ch.find_all('dt', attrs={'class': 'label'})
     keys_array = [key.text.strip() for key in keys]
 except Exception as e:
     print(f"Error while extracting keys: {e}")
-    keys_array = []
+    keys_array = None
 
 try:
-    values = soup.find_all('dd', attrs={'class': 'value'})
+    values = soup_ch.find_all('dd', attrs={'class': 'value'})
     values_array = [value.text.strip() for value in values]
 except Exception as e:
     print(f"Error while extracting values: {e}")
-    values_array = []
+    values_array = None
 
 # Create a dictionary of characteristics if there are keys and values
 if keys_array and values_array:
