@@ -123,14 +123,14 @@ except AttributeError:
 try:
     keys = soup_ch.find_all('dt', attrs={'class': 'label'})
     keys_array = [key.text.strip() for key in keys]
-except Exception as e:
+except AttributeError as e:
     print(f"Error while extracting keys: {e}")
     keys_array = None
 
 try:
     values = soup_ch.find_all('dd', attrs={'class': 'value'})
     values_array = [value.text.strip() for value in values]
-except Exception as e:
+except AttributeError as e:
     print(f"Error while extracting values: {e}")
     values_array = None
 
@@ -138,7 +138,7 @@ except Exception as e:
 if keys_array and values_array:
     product['characteristics'] = dict(zip(keys_array, values_array))
 else:
-    product['characteristics'] = {}
+    product['characteristics'] = None
 
 # Save the product data to Excel
 save_to_excel(product)
