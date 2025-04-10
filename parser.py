@@ -78,7 +78,7 @@ except AttributeError:
     product['color'] = None
 
 try:
-    product['memory'] = soup.find('span', class_='bold').find_next('span', class_='bold').text.strip()
+    product['memory'] = soup.find('span', attrs={'class': 'bold'}).find_next('span', attrs={'class': 'bold'}).text.strip()
 except (AttributeError, IndexError):
     product['memory'] = None
 
